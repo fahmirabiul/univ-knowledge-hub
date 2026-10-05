@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Auth\SsoAuthController;
+use App\Models\Publication;
+use App\Services\Publication\PublicationStorageService;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,6 +19,10 @@ Route::get('/', function () {
 Route::get('/catalog', function () {
     return redirect()->route('home');
 })->name('catalog');
+
+Route::get('/publications/{publication}/download', function (Publication $publication, PublicationStorageService $storageService) {
+    return $storageService->downloadFile($publication);
+})->name('publications.download')->middleware('signed');
 
 /*
 |--------------------------------------------------------------------------

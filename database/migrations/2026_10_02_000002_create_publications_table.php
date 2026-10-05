@@ -15,9 +15,11 @@ return new class extends Migration
     {
         Schema::create('publications', function (Blueprint $table) {
             $table->id();
+            $table->string('registration_code', 50)->nullable()->unique()->index();
             $table->foreignId('submitter_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('category_id')->nullable()->constrained('categories')->nullOnDelete();
             $table->string('doi')->nullable()->unique()->index();
+            $table->string('isbn_issn', 50)->nullable()->index();
             $table->string('title', 500)->index();
             $table->longText('abstract');
             $table->string('journal_name')->index();

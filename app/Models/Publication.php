@@ -24,9 +24,11 @@ class Publication extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'registration_code',
         'submitter_id',
         'category_id',
         'doi',
+        'isbn_issn',
         'title',
         'abstract',
         'journal_name',

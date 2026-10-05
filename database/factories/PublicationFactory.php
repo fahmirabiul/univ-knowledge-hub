@@ -35,9 +35,11 @@ class PublicationFactory extends Factory
         $doi = "{$doiPrefix}/{$doiSuffix}";
 
         return [
+            'registration_code' => 'PUB-'.$year.'-'.strtoupper(fake()->bothify('??##')),
             'submitter_id' => User::factory()->dosen(),
             'category_id' => Category::factory(),
             'doi' => $doi,
+            'isbn_issn' => fake()->boolean(40) ? fake()->numerify('####-####') : null,
             'title' => fake()->sentence(8),
             'abstract' => fake()->paragraphs(3, true),
             'journal_name' => 'IEEE Transactions on '.fake()->words(3, true),
