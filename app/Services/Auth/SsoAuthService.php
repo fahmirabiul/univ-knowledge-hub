@@ -15,6 +15,8 @@ class SsoAuthService
 {
     protected string $baseUrl;
 
+    protected string $internalUrl;
+
     protected ?string $clientId;
 
     protected ?string $clientSecret;
@@ -30,6 +32,7 @@ class SsoAuthService
     public function __construct()
     {
         $this->baseUrl = rtrim((string) config('services.iam.base_url', 'http://localhost:8000'), '/');
+        $this->internalUrl = rtrim((string) config('services.iam.internal_url', $this->baseUrl), '/');
         $this->clientId = config('services.iam.client_id');
         $this->clientSecret = config('services.iam.client_secret');
         $this->redirectUri = (string) config('services.iam.redirect_uri');
@@ -70,7 +73,7 @@ class SsoAuthService
      */
     public function exchangeCodeForToken(string $code): string
     {
-        $response = Http::asForm()->post("{$this->baseUrl}{$this->tokenEndpoint}", [
+        $response = Http::asForm()->post("{$this->internalUrl}{$this->tokenEndpoint}", [
             'grant_type' => 'authorization_code',
             'client_id' => $this->clientId,
             'client_secret' => $this->clientSecret,
@@ -98,7 +101,7 @@ class SsoAuthService
     {
         $response = Http::withToken($accessToken)
             ->acceptJson()
-            ->get("{$this->baseUrl}{$this->userinfoEndpoint}");
+            ->get("{$this->internalUrl}{$this->userinfoEndpoint}");
 
         if (! $response->successful()) {
             throw new RuntimeException('Gagal mengambil data profil pengguna dari IAM. Response: '.$response->body());
@@ -125,16 +128,29 @@ class SsoAuthService
             throw new RuntimeException('Data SSO ID dan Email wajib ada dalam profil IAM.');
         }
 
-        $roleValue = $iamProfile['role'] ?? $iamProfile['role_lokal'] ?? UserRole::MAHASISWA->value;
-        $role = UserRole::tryFrom((string) $roleValue) ?? UserRole::MAHASISWA;
+        $profilData = isset($iamProfile['profil']) && is_array($iamProfile['profil'])
+            ? $iamProfile['profil']
+            : [];
 
-        $statusValue = $iamProfile['academic_status'] ?? $iamProfile['status_akademik'] ?? AcademicStatus::AKTIF->value;
-        $academicStatus = AcademicStatus::tryFrom((string) $statusValue) ?? AcademicStatus::AKTIF;
+        $rawRole = (string) ($iamProfile['role_global'] ?? $iamProfile['role'] ?? $iamProfile['role_lokal'] ?? 'mahasiswa');
+        $role = match ($rawRole) {
+            'superadmin', 'admin', 'admin_lppm' => UserRole::ADMIN_LPPM,
+            'dosen' => UserRole::DOSEN,
+            'mahasiswa' => UserRole::MAHASISWA,
+            default => UserRole::tryFrom($rawRole) ?? UserRole::MAHASISWA,
+        };
 
-        $name = $iamProfile['name'] ?? $iamProfile['nama'] ?? 'Pengguna IAM';
-        $faculty = $iamProfile['faculty'] ?? $iamProfile['fakultas'] ?? null;
-        $studyProgram = $iamProfile['study_program'] ?? $iamProfile['program_studi'] ?? null;
-        $avatarUrl = $iamProfile['avatar_url'] ?? null;
+        $rawStatus = (string) ($profilData['status_akademik'] ?? $iamProfile['academic_status'] ?? $iamProfile['status_akademik'] ?? 'aktif');
+        $academicStatus = match ($rawStatus) {
+            'nonaktif', 'non_aktif', 'inactive' => AcademicStatus::NONAKTIF,
+            'cuti' => AcademicStatus::CUTI,
+            default => AcademicStatus::tryFrom($rawStatus) ?? AcademicStatus::AKTIF,
+        };
+
+        $name = $profilData['nama_lengkap'] ?? $iamProfile['name'] ?? $iamProfile['nama'] ?? 'Pengguna IAM';
+        $faculty = $profilData['fakultas'] ?? $iamProfile['faculty'] ?? $iamProfile['fakultas'] ?? null;
+        $studyProgram = $profilData['program_studi'] ?? $iamProfile['study_program'] ?? $iamProfile['program_studi'] ?? null;
+        $avatarUrl = $profilData['avatar_url'] ?? $iamProfile['avatar_url'] ?? null;
 
         return User::updateOrCreate(
             ['sso_id' => (string) $ssoId],

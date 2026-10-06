@@ -71,7 +71,7 @@ class SsoAuthController extends Controller
             Auth::login($user);
             $request->session()->regenerate();
 
-            return redirect()->intended(route('catalog'))->with('success', "Selamat datang kembali, {$user->name}!");
+            return redirect()->intended(route('publications.index'))->with('success', "Selamat datang kembali, {$user->name}!");
         } catch (Exception $e) {
             Log::error('SSO Callback Exception:', [
                 'message' => $e->getMessage(),

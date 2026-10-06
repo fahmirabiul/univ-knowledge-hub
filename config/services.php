@@ -37,6 +37,7 @@ return [
 
     'iam' => [
         'base_url' => env('IAM_BASE_URL', 'http://localhost:8000'),
+        'internal_url' => env('IAM_INTERNAL_URL', env('IAM_BASE_URL', 'http://localhost:8000')),
         'client_id' => env('IAM_CLIENT_ID'),
         'client_secret' => env('IAM_CLIENT_SECRET'),
         'redirect_uri' => env('IAM_REDIRECT_URI', env('APP_URL', 'http://localhost:8001').'/auth/sso/callback'),

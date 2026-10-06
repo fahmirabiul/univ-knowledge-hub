@@ -21,6 +21,7 @@ class SsoAuthServiceTest extends TestCase
         parent::setUp();
 
         Config::set('services.iam.base_url', 'http://localhost:8000');
+        Config::set('services.iam.internal_url', 'http://localhost:8000');
         Config::set('services.iam.client_id', 'test-client-id');
         Config::set('services.iam.client_secret', 'test-client-secret');
         Config::set('services.iam.redirect_uri', 'http://localhost:8001/auth/sso/callback');

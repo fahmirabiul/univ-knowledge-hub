@@ -74,17 +74,30 @@ class UserProfileSyncService
     {
         $ssoId = (string) ($data['sso_id'] ?? $data['id']);
         $email = (string) $data['email'];
-        $name = (string) ($data['name'] ?? $data['nama'] ?? 'Pengguna IAM');
 
-        $roleValue = (string) ($data['role'] ?? $data['role_lokal'] ?? UserRole::MAHASISWA->value);
-        $role = UserRole::tryFrom($roleValue) ?? UserRole::MAHASISWA;
+        $profilData = isset($data['profil']) && is_array($data['profil'])
+            ? $data['profil']
+            : [];
 
-        $statusValue = (string) ($data['academic_status'] ?? $data['status_akademik'] ?? AcademicStatus::AKTIF->value);
-        $academicStatus = AcademicStatus::tryFrom($statusValue) ?? AcademicStatus::AKTIF;
+        $rawRole = (string) ($data['role_global'] ?? $data['role'] ?? $data['role_lokal'] ?? 'mahasiswa');
+        $role = match ($rawRole) {
+            'superadmin', 'admin', 'admin_lppm' => UserRole::ADMIN_LPPM,
+            'dosen' => UserRole::DOSEN,
+            'mahasiswa' => UserRole::MAHASISWA,
+            default => UserRole::tryFrom($rawRole) ?? UserRole::MAHASISWA,
+        };
 
-        $faculty = $data['faculty'] ?? $data['fakultas'] ?? null;
-        $studyProgram = $data['study_program'] ?? $data['program_studi'] ?? null;
-        $avatarUrl = $data['avatar_url'] ?? null;
+        $rawStatus = (string) ($profilData['status_akademik'] ?? $data['academic_status'] ?? $data['status_akademik'] ?? 'aktif');
+        $academicStatus = match ($rawStatus) {
+            'nonaktif', 'non_aktif', 'inactive' => AcademicStatus::NONAKTIF,
+            'cuti' => AcademicStatus::CUTI,
+            default => AcademicStatus::tryFrom($rawStatus) ?? AcademicStatus::AKTIF,
+        };
+
+        $name = (string) ($profilData['nama_lengkap'] ?? $data['name'] ?? $data['nama'] ?? 'Pengguna IAM');
+        $faculty = $profilData['fakultas'] ?? $data['faculty'] ?? $data['fakultas'] ?? null;
+        $studyProgram = $profilData['program_studi'] ?? $data['study_program'] ?? $data['program_studi'] ?? null;
+        $avatarUrl = $profilData['avatar_url'] ?? $data['avatar_url'] ?? null;
 
         $user = User::updateOrCreate(
             ['sso_id' => $ssoId],
