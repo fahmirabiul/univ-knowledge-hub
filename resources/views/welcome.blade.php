@@ -20,33 +20,83 @@
     <body class="bg-[#FDFDFC] dark:bg-[#0a0a0a] text-[#1b1b18] flex p-6 lg:p-8 items-center lg:justify-center min-h-screen flex-col">
         <header class="w-full lg:max-w-4xl max-w-[335px] text-sm mb-6 not-has-[nav]:hidden">
             @if (Route::has('login'))
-                <nav class="flex items-center justify-end gap-4">
-                    @auth
-                        <a
-                            href="{{ url('/dashboard') }}"
-                            class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal"
-                        >
-                            Dashboard
-                        </a>
-                    @else
-                        <a
-                            href="{{ route('login') }}"
-                            class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] text-[#1b1b18] border border-transparent hover:border-[#19140035] dark:hover:border-[#3E3E3A] rounded-sm text-sm leading-normal"
-                        >
-                            Log in
-                        </a>
+                <nav class="flex items-center justify-between w-full gap-4">
+                    <div class="font-bold text-[#1b1b18] dark:text-white flex items-center gap-2">
+                        <span>Knowledge Hub</span>
+                    </div>
 
-                        @if (Route::has('register'))
+                    <div class="flex items-center gap-3">
+                        @auth
+                            <div class="hidden sm:flex items-center gap-2 text-xs">
+                                <span class="font-semibold text-gray-700 dark:text-gray-300">{{ Auth::user()->name }}</span>
+                                <span class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200 text-[11px] font-medium">
+                                    {{ Auth::user()->role?->label() ?? 'Pengguna' }}
+                                </span>
+                            </div>
+
+                            @if (Auth::user()->isAdminLPPM())
+                                <a
+                                    href="{{ route('admin.review.index') }}"
+                                    class="inline-block px-4 py-1.5 bg-[#7367F0] text-white hover:bg-[#5E50EE] rounded-sm text-sm font-medium"
+                                >
+                                    Verifikasi LPPM
+                                </a>
+                            @elseif (Auth::user()->isDosen())
+                                <a
+                                    href="{{ route('publications.index') }}"
+                                    class="inline-block px-4 py-1.5 bg-[#7367F0] text-white hover:bg-[#5E50EE] rounded-sm text-sm font-medium"
+                                >
+                                    Workspace Naskah
+                                </a>
+                            @else
+                                <a
+                                    href="{{ route('dashboard') }}"
+                                    class="inline-block px-4 py-1.5 bg-[#7367F0] text-white hover:bg-[#5E50EE] rounded-sm text-sm font-medium"
+                                >
+                                    Dashboard
+                                </a>
+                            @endif
+
+                            <form action="{{ route('auth.logout') }}" method="POST" class="inline m-0">
+                                @csrf
+                                <button
+                                    type="submit"
+                                    class="inline-block px-3 py-1.5 text-red-600 hover:text-red-700 border border-red-300 hover:border-red-400 rounded-sm text-sm cursor-pointer"
+                                >
+                                    Keluar (Logout)
+                                </button>
+                            </form>
+                        @else
                             <a
-                                href="{{ route('register') }}"
-                                class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal">
-                                Register
+                                href="{{ route('login') }}"
+                                class="inline-block px-5 py-1.5 bg-[#7367F0] text-white hover:bg-[#5E50EE] rounded-sm text-sm font-medium"
+                            >
+                                Masuk via SSO Kampus
                             </a>
-                        @endif
-                    @endauth
+                        @endauth
+                    </div>
                 </nav>
             @endif
         </header>
+
+        @if (session('success'))
+            <div class="w-full lg:max-w-4xl max-w-[335px] mb-4 p-3 bg-green-50 border border-green-200 text-green-800 rounded-sm text-sm">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="w-full lg:max-w-4xl max-w-[335px] mb-4 p-3 bg-red-50 border border-red-200 text-red-800 rounded-sm text-sm">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if (session('info'))
+            <div class="w-full lg:max-w-4xl max-w-[335px] mb-4 p-3 bg-blue-50 border border-blue-200 text-blue-800 rounded-sm text-sm">
+                {{ session('info') }}
+            </div>
+        @endif
+
         <div class="flex items-center justify-center w-full transition-opacity opacity-100 duration-750 lg:grow starting:opacity-0">
             <main class="flex max-w-[335px] w-full flex-col-reverse lg:max-w-4xl lg:flex-row">
                 <div class="text-[13px] leading-[20px] flex-1 p-6 pb-6 lg:p-20 lg:pb-10 bg-white dark:bg-[#161615] dark:text-[#EDEDEC] shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d] rounded-bl-lg rounded-br-lg lg:rounded-tl-lg lg:rounded-br-none">

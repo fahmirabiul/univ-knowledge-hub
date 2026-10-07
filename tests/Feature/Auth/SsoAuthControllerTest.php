@@ -75,6 +75,46 @@ class SsoAuthControllerTest extends TestCase
         ]);
     }
 
+    public function test_callback_authenticates_admin_lppm_with_unit_payload_and_redirects_to_admin_review(): void
+    {
+        $state = 'valid-lppm-state-token';
+
+        Http::fake([
+            'http://localhost:8000/oauth/token' => Http::response([
+                'access_token' => 'mock-iam-token-lppm',
+                'token_type' => 'Bearer',
+            ], 200),
+            'http://localhost:8000/api/user' => Http::response([
+                'sso_id' => '987e6543-e21b-43d2-b654-426614174999',
+                'email' => 'admin.lppm@univ.ac.id',
+                'role_global' => 'karyawan',
+                'is_superadmin' => false,
+                'is_admin' => true,
+                'unit' => [
+                    'id' => 3,
+                    'kode' => '503',
+                    'nama' => 'LPPM',
+                ],
+                'fakultas' => null,
+                'program_studi' => null,
+                'profil' => [
+                    'nama_lengkap' => 'Suryo Utomo, S.T.',
+                    'nomor_induk' => '20265030001',
+                ],
+            ], 200),
+        ]);
+
+        $response = $this->withSession(['sso_oauth_state' => $state])
+            ->get(route('auth.sso.callback', [
+                'code' => 'valid-iam-code-lppm',
+                'state' => $state,
+            ]));
+
+        $response->assertRedirect(route('admin.review.index'));
+        $this->assertTrue(Auth::check());
+        $this->assertTrue(Auth::user()->isAdminLPPM());
+    }
+
     public function test_callback_handles_iam_error_query(): void
     {
         $response = $this->get(route('auth.sso.callback', [
@@ -139,6 +179,41 @@ class SsoAuthControllerTest extends TestCase
 
         $response->assertRedirect(route('home'));
         $response->assertSessionHas('info');
+        $this->assertFalse(Auth::check());
+    }
+
+    public function test_dashboard_redirects_dosen_to_publications_index(): void
+    {
+        $dosen = User::factory()->dosen()->create();
+
+        $response = $this->actingAs($dosen)->get(route('dashboard'));
+
+        $response->assertRedirect(route('publications.index'));
+    }
+
+    public function test_dashboard_redirects_admin_lppm_to_admin_review_index(): void
+    {
+        $admin = User::factory()->adminLppm()->create();
+
+        $response = $this->actingAs($admin)->get(route('dashboard'));
+
+        $response->assertRedirect(route('admin.review.index'));
+    }
+
+    public function test_dashboard_redirects_guest_to_login(): void
+    {
+        $response = $this->get(route('dashboard'));
+
+        $response->assertRedirect(route('auth.sso.redirect'));
+    }
+
+    public function test_logout_works_via_get_method(): void
+    {
+        $user = User::factory()->dosen()->create();
+
+        $response = $this->actingAs($user)->get(route('auth.logout'));
+
+        $response->assertRedirect(route('home'));
         $this->assertFalse(Auth::check());
     }
 }

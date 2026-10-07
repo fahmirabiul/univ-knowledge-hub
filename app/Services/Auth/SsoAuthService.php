@@ -132,37 +132,60 @@ class SsoAuthService
             ? $iamProfile['profil']
             : [];
 
-        $rawRole = (string) ($iamProfile['role_global'] ?? $iamProfile['role'] ?? $iamProfile['role_lokal'] ?? 'mahasiswa');
-        $role = match ($rawRole) {
-            'superadmin', 'admin', 'admin_lppm' => UserRole::ADMIN_LPPM,
-            'dosen' => UserRole::DOSEN,
-            'mahasiswa' => UserRole::MAHASISWA,
-            default => UserRole::tryFrom($rawRole) ?? UserRole::MAHASISWA,
+        $assignedRoles = array_map('strval', (array) ($iamProfile['roles'] ?? []));
+        $globalRole = (string) ($iamProfile['role_global'] ?? $iamProfile['role'] ?? $iamProfile['role_lokal'] ?? '');
+        $isAdmin = (bool) ($iamProfile['is_admin'] ?? false);
+        $isSuperAdmin = (bool) ($iamProfile['is_superadmin'] ?? false);
+
+        $unitName = '';
+        if (isset($iamProfile['unit']) && is_array($iamProfile['unit'])) {
+            $unitName = (string) ($iamProfile['unit']['nama'] ?? $iamProfile['unit']['name'] ?? '');
+        } elseif (isset($profilData['unit_kerja'])) {
+            $unitName = (string) $profilData['unit_kerja'];
+        }
+
+        $isLppmAdmin = ($isAdmin || $isSuperAdmin) && str_contains(strtoupper($unitName), 'LPPM');
+
+        $role = match (true) {
+            $isLppmAdmin || in_array('admin_lppm', $assignedRoles, true) || $globalRole === 'admin_lppm' => UserRole::ADMIN_LPPM,
+            in_array('dosen', $assignedRoles, true) || $globalRole === 'dosen' => UserRole::DOSEN,
+            in_array('mahasiswa', $assignedRoles, true) || $globalRole === 'mahasiswa' => UserRole::MAHASISWA,
+            default => UserRole::tryFrom($globalRole) ?? UserRole::MAHASISWA,
         };
 
-        $rawStatus = (string) ($profilData['status_akademik'] ?? $iamProfile['academic_status'] ?? $iamProfile['status_akademik'] ?? 'aktif');
+        // Support reconciling pre-seeded local users matching on sso_id OR email
+        $user = User::where('sso_id', (string) $ssoId)
+            ->orWhere('email', (string) $email)
+            ->first();
+
+        $rawStatus = (string) ($profilData['status_akademik'] ?? $iamProfile['academic_status'] ?? $iamProfile['status_akademik'] ?? ($user?->academic_status?->value ?? 'aktif'));
         $academicStatus = match ($rawStatus) {
             'nonaktif', 'non_aktif', 'inactive' => AcademicStatus::NONAKTIF,
             'cuti' => AcademicStatus::CUTI,
             default => AcademicStatus::tryFrom($rawStatus) ?? AcademicStatus::AKTIF,
         };
 
-        $name = $profilData['nama_lengkap'] ?? $iamProfile['name'] ?? $iamProfile['nama'] ?? 'Pengguna IAM';
-        $faculty = $profilData['fakultas'] ?? $iamProfile['faculty'] ?? $iamProfile['fakultas'] ?? null;
-        $studyProgram = $profilData['program_studi'] ?? $iamProfile['study_program'] ?? $iamProfile['program_studi'] ?? null;
-        $avatarUrl = $profilData['avatar_url'] ?? $iamProfile['avatar_url'] ?? null;
+        $name = (string) ($profilData['nama_lengkap'] ?? $iamProfile['nama_lengkap'] ?? $iamProfile['name'] ?? $iamProfile['nama'] ?? ($user?->name ?? 'Pengguna IAM'));
+        $faculty = $iamProfile['fakultas'] ?? $profilData['fakultas'] ?? $iamProfile['faculty'] ?? ($user?->faculty ?? null);
+        $studyProgram = $iamProfile['program_studi'] ?? $profilData['program_studi'] ?? $iamProfile['study_program'] ?? ($user?->study_program ?? null);
+        $avatarUrl = $iamProfile['avatar_url'] ?? $profilData['avatar_url'] ?? ($user?->avatar_url ?? null);
 
-        return User::updateOrCreate(
-            ['sso_id' => (string) $ssoId],
-            [
-                'name' => (string) $name,
-                'email' => (string) $email,
-                'role' => $role,
-                'academic_status' => $academicStatus,
-                'faculty' => $faculty ? (string) $faculty : null,
-                'study_program' => $studyProgram ? (string) $studyProgram : null,
-                'avatar_url' => $avatarUrl ? (string) $avatarUrl : null,
-            ]
-        );
+        $attributes = [
+            'sso_id' => (string) $ssoId,
+            'name' => (string) $name,
+            'email' => (string) $email,
+            'role' => $role,
+            'academic_status' => $academicStatus,
+            'faculty' => $faculty ? (string) $faculty : null,
+            'study_program' => $studyProgram ? (string) $studyProgram : null,
+            'avatar_url' => $avatarUrl ? (string) $avatarUrl : null,
+        ];
+
+        if ($user) {
+            $user->update($attributes);
+            return $user;
+        }
+
+        return User::create($attributes);
     }
 }

@@ -73,6 +73,14 @@ class PublicationStorageService
     }
 
     /**
+     * Alias for generateTemporaryDownloadUrl.
+     */
+    public function getTemporaryDownloadUrl(Publication $publication, int $minutes = 15): string
+    {
+        return $this->generateTemporaryDownloadUrl($publication, $minutes);
+    }
+
+    /**
      * Get a binary streamed download response for the stored PDF file.
      */
     public function downloadFile(Publication $publication): StreamedResponse

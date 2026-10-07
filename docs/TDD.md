@@ -19,8 +19,9 @@ Bertindak sebagai aplikasi operasional murni. Sistem ini mendelegasikan proses *
 
 **4. Design Patterns & Logika Inti**
 
-- **Event-Driven Worker:** Sebuah *daemon/worker* Laravel yang berjalan di latar belakang, khusus mendengarkan *channel* Redis `university.user.updated`. Jika ada pesan masuk, *worker* ini akan mencari `sso_id` di tabel `users` lokal dan memperbarui data profilnya secara otomatis tanpa membebani *traffic* antarmuka.
+- **Event-Driven Worker:** Sebuah *daemon/worker* Laravel yang berjalan di latar belakang, khusus mendengarkan *channel* Redis `university.user.profile_updated`. Jika ada pesan masuk, *worker* ini akan mencari `sso_id` di tabel `users` lokal dan memperbarui data profilnya secara otomatis tanpa membebani *traffic* antarmuka.
 - **State Pattern:** Mengamankan transisi kolom `status_pengajuan` di tabel `publications`. Mencegah jurnal yang berstatus `Rejected` diubah paksa menjadi `Approved` tanpa melalui logika validasi ulang.
+- **Unit-Based Admin Authorization:** Hak admin LPPM ditentukan melalui atribut `is_admin = true` dan `unit.nama = "LPPM"` pada payload IAM, atau role sivitas `dosen` untuk akses peneliti.
 - **Service Pattern:** Mengelola komunikasi dengan API eksternal (misal: `CrossrefMetadataService` untuk menarik data berdasarkan DOI jurnal yang diinput dosen).
 
 ---

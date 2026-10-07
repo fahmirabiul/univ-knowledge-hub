@@ -73,6 +73,17 @@ class PublicationStorageServiceTest extends TestCase
         $this->assertStringContainsString((string) $pub->id, $url);
     }
 
+    public function test_get_temporary_download_url_alias_matches_generate(): void
+    {
+        $pub = Publication::factory()->approved()->create();
+
+        $service = new PublicationStorageService;
+        $url = $service->getTemporaryDownloadUrl($pub, 15);
+
+        $this->assertStringContainsString('signature=', $url);
+        $this->assertStringContainsString((string) $pub->id, $url);
+    }
+
     public function test_delete_file_removes_file_from_storage(): void
     {
         $file = UploadedFile::fake()->create('to_delete.pdf', 500, 'application/pdf');

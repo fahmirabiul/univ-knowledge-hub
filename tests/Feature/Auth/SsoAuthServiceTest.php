@@ -157,4 +157,136 @@ class SsoAuthServiceTest extends TestCase
 
         $this->assertEquals('d0000000-0000-0000-0000-000000000088', $user->sso_id);
     }
+
+    public function test_sync_local_user_maps_admin_lppm_role(): void
+    {
+        $service = new SsoAuthService;
+
+        $user = $service->syncLocalUser([
+            'sso_id' => 'e0000000-0000-0000-0000-000000000077',
+            'email' => 'admin.lppm@univ.ac.id',
+            'name' => 'Admin LPPM Portal',
+            'role_global' => 'admin_lppm',
+            'academic_status' => 'aktif',
+        ]);
+
+        $this->assertEquals(UserRole::ADMIN_LPPM, $user->role);
+        $this->assertTrue($user->isAdminLPPM());
+    }
+
+    public function test_sync_local_user_reconciles_pre_seeded_user_by_email(): void
+    {
+        // Pre-seeded user with dummy sso_id
+        $seededUser = \App\Models\User::factory()->create([
+            'sso_id' => 'a0000000-0000-0000-0000-000000000001',
+            'email' => 'admin.lppm@univ.ac.id',
+            'role' => UserRole::ADMIN_LPPM,
+        ]);
+
+        $service = new SsoAuthService;
+
+        // User logs in via IAM with real IAM UUID
+        $realIamUuid = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
+        $syncedUser = $service->syncLocalUser([
+            'id' => $realIamUuid,
+            'email' => 'admin.lppm@univ.ac.id',
+            'name' => 'Dr. Ir. Hendra Gunawan, M.T.',
+            'role_global' => 'admin_lppm',
+        ]);
+
+        $this->assertEquals($seededUser->id, $syncedUser->id);
+        $this->assertEquals($realIamUuid, $syncedUser->sso_id);
+        $this->assertEquals(UserRole::ADMIN_LPPM, $syncedUser->role);
+    }
+
+    public function test_sync_local_user_maps_admin_lppm_from_unit_and_is_admin_flag(): void
+    {
+        $service = new SsoAuthService;
+
+        $user = $service->syncLocalUser([
+            'sso_id' => '987e6543-e21b-43d2-b654-426614174999',
+            'email' => 'admin.lppm@univ.ac.id',
+            'role_global' => 'karyawan',
+            'is_superadmin' => false,
+            'is_admin' => true,
+            'unit' => [
+                'id' => 3,
+                'kode' => '503',
+                'nama' => 'LPPM',
+            ],
+            'profil' => [
+                'nama_lengkap' => 'Suryo Utomo, S.T.',
+                'nomor_induk' => '20265030001',
+            ],
+        ]);
+
+        $this->assertEquals(UserRole::ADMIN_LPPM, $user->role);
+        $this->assertTrue($user->isAdminLPPM());
+        $this->assertEquals('Suryo Utomo, S.T.', $user->name);
+    }
+
+    public function test_sync_local_user_karyawan_non_lppm_defaults_to_mahasiswa(): void
+    {
+        $service = new SsoAuthService;
+
+        $user = $service->syncLocalUser([
+            'sso_id' => '987e6543-e21b-43d2-b654-426614174888',
+            'email' => 'staff.keuangan@univ.ac.id',
+            'role_global' => 'karyawan',
+            'is_superadmin' => false,
+            'is_admin' => false,
+            'unit' => [
+                'id' => 4,
+                'kode' => '504',
+                'nama' => 'Biro Keuangan',
+            ],
+            'profil' => [
+                'nama_lengkap' => 'Staff Keuangan',
+            ],
+        ]);
+
+        $this->assertEquals(UserRole::MAHASISWA, $user->role);
+        $this->assertFalse($user->isAdminLPPM());
+        $this->assertFalse($user->isDosen());
+    }
+
+    public function test_sync_local_user_extracts_admin_lppm_from_roles_array_when_global_is_karyawan(): void
+    {
+        $service = new SsoAuthService;
+
+        $user = $service->syncLocalUser([
+            'sso_id' => '01924b8e-1234-7000-8000-000000000001',
+            'email' => 'staff.lppm@univ.ac.id',
+            'role_global' => 'karyawan',
+            'roles' => ['karyawan', 'admin_lppm'],
+            'profil' => [
+                'nama_lengkap' => 'Suryo Utomo, S.T.',
+                'nomor_induk' => 'LPPM-202001',
+                'status_akademik' => 'aktif',
+            ],
+        ]);
+
+        $this->assertEquals(UserRole::ADMIN_LPPM, $user->role);
+        $this->assertTrue($user->isAdminLPPM());
+        $this->assertEquals('Suryo Utomo, S.T.', $user->name);
+    }
+
+    public function test_sync_local_user_extracts_dosen_from_roles_array(): void
+    {
+        $service = new SsoAuthService;
+
+        $user = $service->syncLocalUser([
+            'sso_id' => '01924b8e-1234-7000-8000-000000000002',
+            'email' => 'fahmi.dosen@univ.ac.id',
+            'role_global' => 'dosen',
+            'roles' => ['dosen'],
+            'profil' => [
+                'nama_lengkap' => 'Dr. Fahmi R., M.Kom.',
+                'status_akademik' => 'aktif',
+            ],
+        ]);
+
+        $this->assertEquals(UserRole::DOSEN, $user->role);
+        $this->assertTrue($user->isDosen());
+    }
 }

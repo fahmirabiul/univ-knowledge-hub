@@ -132,4 +132,105 @@ class RedisUserProfileSyncTest extends TestCase
         $commands = Artisan::all();
         $this->assertArrayHasKey('redis:listen-users', $commands);
     }
+
+    public function test_sync_service_maps_admin_lppm_and_reconciles_by_email(): void
+    {
+        $seededAdmin = User::factory()->create([
+            'sso_id' => 'a0000000-0000-0000-0000-000000000001',
+            'email' => 'admin.lppm@univ.ac.id',
+            'role' => UserRole::ADMIN_LPPM,
+        ]);
+
+        $payload = json_encode([
+            'sso_id' => '77777777-6666-5555-4444-333333333333',
+            'email' => 'admin.lppm@univ.ac.id',
+            'name' => 'Dr. Ir. Hendra Gunawan, M.T.',
+            'role_global' => 'admin_lppm',
+            'academic_status' => 'aktif',
+        ], JSON_THROW_ON_ERROR);
+
+        $service = new UserProfileSyncService;
+        $syncedUser = $service->handle($payload);
+
+        $this->assertNotNull($syncedUser);
+        $this->assertEquals($seededAdmin->id, $syncedUser->id);
+        $this->assertEquals('77777777-6666-5555-4444-333333333333', $syncedUser->sso_id);
+        $this->assertEquals(UserRole::ADMIN_LPPM, $syncedUser->role);
+    }
+
+    public function test_sync_service_maps_admin_lppm_from_unit_and_is_admin_flag(): void
+    {
+        $payload = [
+            'event' => 'UserProfileUpdated',
+            'timestamp' => '2026-10-07T14:10:36Z',
+            'data' => [
+                'sso_id' => '987e6543-e21b-43d2-b654-426614174999',
+                'email' => 'admin.lppm@univ.ac.id',
+                'nama_lengkap' => 'Suryo Utomo, S.T.',
+                'role_global' => 'karyawan',
+                'is_admin' => true,
+                'unit' => [
+                    'id' => 3,
+                    'kode' => '503',
+                    'nama' => 'LPPM',
+                ],
+            ],
+        ];
+
+        $service = new UserProfileSyncService;
+        $syncedUser = $service->handle($payload);
+
+        $this->assertNotNull($syncedUser);
+        $this->assertEquals(UserRole::ADMIN_LPPM, $syncedUser->role);
+        $this->assertEquals('Suryo Utomo, S.T.', $syncedUser->name);
+        $this->assertEquals('admin.lppm@univ.ac.id', $syncedUser->email);
+    }
+
+    public function test_sync_service_updates_existing_user_without_email_in_payload(): void
+    {
+        $user = User::factory()->dosen()->create([
+            'sso_id' => '01924b8e-9999-7000-8000-000000000001',
+            'name' => 'Nama Lama',
+            'email' => 'dosen.asli@univ.ac.id',
+        ]);
+
+        $payload = [
+            'event' => 'UserProfileUpdated',
+            'data' => [
+                'sso_id' => '01924b8e-9999-7000-8000-000000000001',
+                'nama_lengkap' => 'Nama Baru Update',
+                'role_global' => 'dosen',
+            ],
+        ];
+
+        $service = new UserProfileSyncService;
+        $syncedUser = $service->handle($payload);
+
+        $this->assertNotNull($syncedUser);
+        $this->assertEquals($user->id, $syncedUser->id);
+        $this->assertEquals('Nama Baru Update', $syncedUser->name);
+        $this->assertEquals('dosen.asli@univ.ac.id', $syncedUser->email);
+    }
+
+    public function test_sync_service_maps_admin_lppm_from_roles_array(): void
+    {
+        $payload = json_encode([
+            'sso_id' => '01924b8e-5555-7000-8000-000000000099',
+            'email' => 'staff.lppm@univ.ac.id',
+            'role_global' => 'karyawan',
+            'roles' => ['karyawan', 'admin_lppm'],
+            'profil' => [
+                'nama_lengkap' => 'Suryo Utomo, S.T.',
+                'nomor_induk' => 'LPPM-202001',
+                'status_akademik' => 'aktif',
+            ],
+        ], JSON_THROW_ON_ERROR);
+
+        $service = new UserProfileSyncService;
+        $syncedUser = $service->handle($payload);
+
+        $this->assertNotNull($syncedUser);
+        $this->assertEquals(UserRole::ADMIN_LPPM, $syncedUser->role);
+        $this->assertEquals('Suryo Utomo, S.T.', $syncedUser->name);
+    }
 }

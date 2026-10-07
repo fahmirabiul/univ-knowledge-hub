@@ -40,7 +40,7 @@
             @if ($publication->file_path)
                 @php
                     $storageService = app(\App\Services\Publication\PublicationStorageService::class);
-                    $downloadUrl = $storageService->getTemporaryDownloadUrl($publication);
+                    $downloadUrl = $storageService->generateTemporaryDownloadUrl($publication);
                 @endphp
                 <a href="{{ $downloadUrl }}" class="btn btn-primary btn-sm d-flex align-items-center gap-1" target="_blank" rel="noopener noreferrer">
                     <i class="icon-base ti tabler-download"></i>

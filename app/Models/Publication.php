@@ -5,7 +5,13 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\PublicationStatus;
+use App\Observers\PublicationObserver;
+use App\States\Publication\ApprovedState;
+use App\States\Publication\PendingState;
+use App\States\Publication\PublicationState;
+use App\States\Publication\RejectedState;
 use Database\Factories\PublicationFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,10 +19,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[ObservedBy([PublicationObserver::class])]
 class Publication extends Model
 {
     /** @use HasFactory<PublicationFactory> */
     use HasFactory;
+
+    /**
+     * Transient actor performing the state change.
+     */
+    public ?User $currentActor = null;
+
+    /**
+     * Transient reviewer / audit notes for status transitions.
+     */
+    public ?string $auditNotes = null;
 
     /**
      * The attributes that are mass assignable.
@@ -137,6 +154,50 @@ class Publication extends Model
     public function isRejected(): bool
     {
         return $this->status === PublicationStatus::REJECTED;
+    }
+
+    /**
+     * Get the State pattern handler for this publication's current status.
+     */
+    public function state(): PublicationState
+    {
+        return $this->stateFor($this->status);
+    }
+
+    /**
+     * Get the State pattern handler for a specific status.
+     */
+    public function stateFor(PublicationStatus $status): PublicationState
+    {
+        return match ($status) {
+            PublicationStatus::PENDING => new PendingState($this),
+            PublicationStatus::APPROVED => new ApprovedState($this),
+            PublicationStatus::REJECTED => new RejectedState($this),
+        };
+    }
+
+    /**
+     * Approve publication (delegated to State Pattern).
+     */
+    public function approve(User $actor, ?string $notes = null): void
+    {
+        $this->state()->approve($actor, $notes);
+    }
+
+    /**
+     * Reject publication with notes/reason (delegated to State Pattern).
+     */
+    public function reject(User $actor, string $reason): void
+    {
+        $this->state()->reject($actor, $reason);
+    }
+
+    /**
+     * Resubmit publication (delegated to State Pattern).
+     */
+    public function resubmit(User $actor, ?string $notes = null): void
+    {
+        $this->state()->resubmit($actor, $notes);
     }
 
     /**

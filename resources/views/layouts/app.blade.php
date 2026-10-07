@@ -330,7 +330,7 @@
                 @if (Auth::user()?->isAdminLPPM())
                     <li class="sidebar-nav-header">LPPM</li>
                     <li class="sidebar-nav-item">
-                        <a href="{{ route('publications.index') }}" class="sidebar-nav-link">
+                        <a href="{{ route('admin.review.index') }}" class="sidebar-nav-link {{ request()->routeIs('admin.review.*') ? 'active' : '' }}">
                             <i class="sidebar-nav-icon icon-base ti tabler-checklist"></i>
                             <span>Verifikasi Naskah</span>
                         </a>
