@@ -144,7 +144,13 @@ class SsoAuthService
             $unitName = (string) $profilData['unit_kerja'];
         }
 
-        $isLppmAdmin = ($isAdmin || $isSuperAdmin) && str_contains(strtoupper($unitName), 'LPPM');
+        $isLppmAdmin = $isAdmin
+            || $isSuperAdmin
+            || in_array($globalRole, ['admin', 'super_admin', 'admin_lppm'], true)
+            || in_array('admin_lppm', $assignedRoles, true)
+            || in_array('admin', $assignedRoles, true)
+            || in_array('super_admin', $assignedRoles, true)
+            || str_contains(strtoupper($unitName), 'LPPM');
 
         $role = match (true) {
             $isLppmAdmin || in_array('admin_lppm', $assignedRoles, true) || $globalRole === 'admin_lppm' => UserRole::ADMIN_LPPM,

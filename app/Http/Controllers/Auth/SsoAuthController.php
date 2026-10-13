@@ -77,7 +77,12 @@ class SsoAuthController extends Controller
                 default => route('home'),
             };
 
-            return redirect()->intended($targetRoute)->with('success', "Selamat datang kembali, {$user->name}!");
+            $intended = $request->session()->pull('url.intended');
+            if ($intended && ! in_array($intended, [route('home'), route('login'), route('dashboard'), url('/'), ''], true)) {
+                return redirect()->to($intended)->with('success', "Selamat datang kembali, {$user->name}!");
+            }
+
+            return redirect()->to($targetRoute)->with('success', "Selamat datang kembali, {$user->name}!");
         } catch (Exception $e) {
             Log::error('SSO Callback Exception:', [
                 'message' => $e->getMessage(),

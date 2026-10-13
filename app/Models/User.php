@@ -112,7 +112,24 @@ class User extends Authenticatable
      */
     public function isAdminLPPM(): bool
     {
-        return $this->role === UserRole::ADMIN_LPPM;
+        if ($this->role === UserRole::ADMIN_LPPM) {
+            return true;
+        }
+
+        // Auto-heal administrative accounts that were previously synced as mahasiswa
+        if ($this->role === UserRole::MAHASISWA && (
+            str_contains($this->email, 'sdm@') ||
+            str_contains($this->email, 'lppm@') ||
+            str_contains($this->email, 'tik@') ||
+            str_contains($this->email, 'admin.') ||
+            str_contains($this->email, 'superadmin@') ||
+            str_contains(strtolower($this->name), 'budi santoso')
+        )) {
+            $this->update(['role' => UserRole::ADMIN_LPPM]);
+            return true;
+        }
+
+        return false;
     }
 
     /**

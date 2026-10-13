@@ -27,6 +27,9 @@ class EnsureUserRole
         }
 
         $user = Auth::user();
+        if (in_array('admin_lppm', $roles, true)) {
+            $user->isAdminLPPM();
+        }
         $userRole = $user->role?->value ?? (string) $user->role;
 
         if (! empty($roles) && ! in_array($userRole, $roles, true)) {

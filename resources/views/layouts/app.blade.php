@@ -309,12 +309,22 @@
             </div>
 
             <ul class="sidebar-nav">
+                @if (Auth::user()?->isAdminLPPM())
+                    <li class="sidebar-nav-header">LPPM</li>
+                    <li class="sidebar-nav-item">
+                        <a href="{{ route('admin.review.index') }}" class="sidebar-nav-link {{ request()->routeIs('admin.review.*') ? 'active' : '' }}">
+                            <i class="sidebar-nav-icon icon-base ti tabler-checklist"></i>
+                            <span>Antrean Verifikasi</span>
+                        </a>
+                    </li>
+                @endif
+
                 <li class="sidebar-nav-header">Workspace</li>
-                
+
                 <li class="sidebar-nav-item">
                     <a href="{{ route('publications.index') }}" class="sidebar-nav-link {{ request()->routeIs('publications.*') ? 'active' : '' }}">
                         <i class="sidebar-nav-icon icon-base ti tabler-files"></i>
-                        <span>Naskah Publikasi</span>
+                        <span>{{ Auth::user()?->isAdminLPPM() ? 'Semua Publikasi' : 'Naskah Publikasi' }}</span>
                     </a>
                 </li>
 
@@ -326,16 +336,6 @@
                         <span>Katalog Publikasi</span>
                     </a>
                 </li>
-
-                @if (Auth::user()?->isAdminLPPM())
-                    <li class="sidebar-nav-header">LPPM</li>
-                    <li class="sidebar-nav-item">
-                        <a href="{{ route('admin.review.index') }}" class="sidebar-nav-link {{ request()->routeIs('admin.review.*') ? 'active' : '' }}">
-                            <i class="sidebar-nav-icon icon-base ti tabler-checklist"></i>
-                            <span>Verifikasi Naskah</span>
-                        </a>
-                    </li>
-                @endif
             </ul>
 
             <!-- Sidebar Footer: User Identity & Logout -->
@@ -370,7 +370,7 @@
                     </button>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb mb-0" style="font-size: 0.85rem;">
-                            <li class="breadcrumb-item"><a href="{{ route('publications.index') }}" class="text-muted text-decoration-none">Knowledge Hub</a></li>
+                            <li class="breadcrumb-item"><a href="{{ Auth::user()?->isAdminLPPM() ? route('admin.review.index') : route('publications.index') }}" class="text-muted text-decoration-none">Knowledge Hub</a></li>
                             <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">@yield('title', 'Workspace')</li>
                         </ol>
                     </nav>
