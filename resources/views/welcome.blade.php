@@ -26,8 +26,9 @@
             --bs-danger: #EA5455;
             --bs-info: #00CFE8;
             --bs-body-bg: #F8F7FA;
-            --bs-body-color: #6F6B7D;
-            --bs-heading-color: #4B465C;
+            --bs-body-color: #5D596C;
+            --bs-heading-color: #2F2B3D;
+            --border-color: #DBDADE;
         }
 
         body {
@@ -41,10 +42,10 @@
             padding: 0;
         }
 
-        /* Top Navbar */
-        .landing-navbar {
-            background: #FFFFFF;
-            border-bottom: 1px solid #DBDADE;
+        /* Top Header */
+        .catalog-header {
+            background-color: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
             padding: 0.85rem 1.5rem;
             position: sticky;
             top: 0;
@@ -52,89 +53,77 @@
         }
 
         .brand-logo {
-            width: 38px;
-            height: 38px;
-            border-radius: 8px;
-            background: #7367F0;
-            display: flex;
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            background-color: var(--bs-primary);
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             color: #FFFFFF;
             font-size: 1.25rem;
-            box-shadow: 0 4px 8px rgba(115, 103, 240, 0.25);
             flex-shrink: 0;
         }
 
         .avatar-initials {
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
-            background-color: rgba(115, 103, 240, 0.12);
-            color: #7367F0;
+            background-color: rgba(115, 103, 240, 0.1);
+            color: var(--bs-primary);
             font-weight: 600;
-            font-size: 0.9rem;
-            display: flex;
+            font-size: 0.85rem;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
         }
 
-        /* Hero Search Canvas */
-        .hero-banner {
-            background: linear-gradient(135deg, #7367F0 0%, #4834D4 100%);
-            color: #FFFFFF;
-            padding: 3.5rem 1.5rem 3rem 1.5rem;
-            position: relative;
-            overflow: hidden;
+        /* Scholarly Hero Banner (Flat, Clean, Institutional) */
+        .scholarly-banner {
+            background-color: #FFFFFF;
+            border-bottom: 1px solid var(--border-color);
+            padding: 2.75rem 1.5rem 2.25rem 1.5rem;
         }
 
-        .hero-banner::before {
-            content: '';
-            position: absolute;
-            top: -50px;
-            right: -50px;
-            width: 300px;
-            height: 300px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.08);
-            pointer-events: none;
-        }
-
-        .search-container {
-            background: #FFFFFF;
-            border-radius: 10px;
-            box-shadow: 0 8px 24px rgba(47, 43, 61, 0.12);
-            padding: 0.75rem;
-            margin-top: 1.5rem;
+        .scholarly-search-box {
+            background-color: #F8F7FA;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.5rem;
         }
 
         /* Publication Cards */
         .card-publication {
-            border: 1px solid #DBDADE;
-            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
             background-color: #FFFFFF;
-            transition: transform 0.18s ease-in-out, box-shadow 0.18s ease-in-out;
             height: 100%;
             display: flex;
             flex-direction: column;
+            padding: 1.25rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
 
         .card-publication:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(47, 43, 61, 0.08);
-            border-color: #C3C1C7;
+            border-color: #B5B2C0;
+            box-shadow: 0 2px 6px rgba(47, 43, 61, 0.06);
         }
 
         .badge-category {
-            background-color: rgba(0, 207, 232, 0.12);
+            background-color: rgba(0, 207, 232, 0.1);
             color: #007A8C;
             font-weight: 600;
+            border-radius: 4px;
+            padding: 0.3rem 0.55rem;
         }
 
         .badge-role {
-            background-color: rgba(115, 103, 240, 0.12);
-            color: #7367F0;
+            background-color: rgba(115, 103, 240, 0.1);
+            color: var(--bs-primary);
             font-weight: 600;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
         }
 
         .abstract-clamp {
@@ -143,19 +132,19 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
             font-size: 0.85rem;
-            line-height: 1.5;
+            line-height: 1.55;
             color: #6F6B7D;
         }
 
-        /* Accessible focus ring (R-32) */
+        /* Accessible Focus Ring (R-32) */
         a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
-            outline: 2px solid #7367F0;
+            outline: 2px solid var(--bs-primary);
             outline-offset: 2px;
         }
 
-        .landing-footer {
-            background: #FFFFFF;
-            border-top: 1px solid #DBDADE;
+        .catalog-footer {
+            background-color: #FFFFFF;
+            border-top: 1px solid var(--border-color);
             padding: 1.25rem 1.5rem;
             color: #8C869B;
             font-size: 0.85rem;
@@ -164,25 +153,25 @@
     </style>
 </head>
 <body>
-    <!-- Top Navbar -->
-    <header class="landing-navbar">
+    <!-- Top Header Navigation -->
+    <header class="catalog-header">
         <div class="container-xl d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-3">
                 <a href="{{ route('home') }}" class="d-flex align-items-center gap-2 text-decoration-none">
-                    <div class="brand-logo">
+                    <div class="brand-logo" aria-hidden="true">
                         <i class="icon-base ti tabler-books"></i>
                     </div>
                     <div>
-                        <div class="fw-bold text-dark lh-sm" style="font-size: 1.1rem;">Knowledge Hub</div>
-                        <div class="text-muted" style="font-size: 0.72rem;">Repositori Riset Sivitas</div>
+                        <div class="fw-bold text-dark lh-sm" style="font-size: 1.05rem;">Knowledge Hub</div>
+                        <div class="text-muted" style="font-size: 0.72rem;">Repositori Riset Sivitas Akademika</div>
                     </div>
                 </a>
             </div>
 
-            <!-- Auth Status & Controls -->
+            <!-- User Auth Status & Action CTAs -->
             <div class="d-flex align-items-center gap-2">
                 @auth
-                    <!-- Demographic Pill -->
+                    <!-- User Demographic Info -->
                     <div class="d-none d-md-flex align-items-center gap-2 text-end me-1">
                         <div>
                             <div class="fw-semibold text-dark" style="font-size: 0.85rem;">{{ Auth::user()->name }}</div>
@@ -230,7 +219,7 @@
                         </button>
                     </form>
                 @else
-                    <a href="{{ route('login') }}" class="btn btn-primary d-inline-flex align-items-center gap-2 px-3 py-2">
+                    <a href="{{ route('login') }}" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-2 px-3 py-2">
                         <i class="icon-base ti tabler-key fs-5"></i>
                         <span class="fw-semibold">Masuk via SSO Kampus</span>
                     </a>
@@ -266,39 +255,38 @@
         @endif
     </div>
 
-    <!-- Hero Search Canvas -->
-    <section class="hero-banner my-3">
-        <div class="container-xl position-relative">
+    <!-- Scholarly Catalog Header & Search Section -->
+    <section class="scholarly-banner">
+        <div class="container-xl">
             <div class="row justify-content-center text-center">
-                <div class="col-12 col-lg-8">
-                    <span class="badge bg-white bg-opacity-25 text-white border border-white border-opacity-25 px-3 py-1 rounded-pill mb-2">
-                        <i class="icon-base ti tabler-certificate me-1"></i> Repositori Resmi Sivitas Akademika
-                    </span>
-                    <h2 class="fw-bold text-white mb-2">Eksplorasi Publikasi Ilmiah & Riset Sivitas</h2>
-                    <p class="text-white text-opacity-75 small mb-0">
-                        Akses naskah artikel jurnal, prosiding konferensi, dan karya ilmiah terverifikasi Lembaga Penelitian & Pengabdian kepada Masyarakat (LPPM).
+                <div class="col-12 col-lg-9">
+                    <h3 class="fw-bold text-dark mb-1">Repositori Publikasi Ilmiah & Riset Sivitas</h3>
+                    <p class="text-secondary small mb-3">
+                        Katalog naskah artikel jurnal, prosiding konferensi, dan karya ilmiah terverifikasi Lembaga Penelitian & Pengabdian kepada Masyarakat (LPPM).
                     </p>
 
-                    <!-- Hero Search Box -->
-                    <div class="search-container text-start">
+                    <!-- Search & Filter Controls -->
+                    <div class="scholarly-search-box text-start">
                         <form action="{{ route('home') }}" method="GET" class="row g-2 align-items-center m-0">
                             <div class="col-12 col-md-7">
+                                <label for="search-input" class="visually-hidden">Kata kunci pencarian publikasi</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-white border-end-0 text-muted">
                                         <i class="icon-base ti tabler-search"></i>
                                     </span>
                                     <input
                                         type="text"
+                                        id="search-input"
                                         name="q"
                                         class="form-control border-start-0 ps-0"
                                         placeholder="Cari judul artikel, nama penulis/dosen, atau DOI..."
                                         value="{{ $currentSearch }}"
-                                        aria-label="Kata kunci pencarian"
                                     >
                                 </div>
                             </div>
                             <div class="col-12 col-md-3">
-                                <select name="category_id" class="form-select" aria-label="Filter Kategori Bidang Riset">
+                                <label for="category-select" class="visually-hidden">Filter Bidang Riset</label>
+                                <select id="category-select" name="category_id" class="form-select">
                                     <option value="">Semua Bidang Riset</option>
                                     @foreach ($categories as $cat)
                                         <option value="{{ $cat->id }}" {{ (string) $currentCategory === (string) $cat->id ? 'selected' : '' }}>
@@ -318,7 +306,7 @@
 
                     @if ($currentSearch || $currentCategory)
                         <div class="mt-2 text-start">
-                            <a href="{{ route('home') }}" class="btn btn-sm btn-link text-white text-decoration-none p-0 d-inline-flex align-items-center gap-1 opacity-75 hover-opacity-100">
+                            <a href="{{ route('home') }}" class="btn btn-sm btn-link text-secondary text-decoration-none p-0 d-inline-flex align-items-center gap-1">
                                 <i class="icon-base ti tabler-rotate"></i>
                                 <span>Reset Filter Pencarian</span>
                             </a>
@@ -331,8 +319,8 @@
 
     <!-- Main Repository Catalog Content -->
     <main class="container-xl my-4 flex-grow-1">
-        <!-- Results Status Header -->
-        <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+        <!-- Results Summary Bar -->
+        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
             <div>
                 <h5 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
                     <i class="icon-base ti tabler-article text-primary"></i>
@@ -345,43 +333,43 @@
         </div>
 
         <!-- Publication Cards Grid -->
-        <div class="row g-4">
+        <div class="row g-3">
             @forelse ($publications as $pub)
                 <div class="col-12 col-md-6 col-lg-4">
-                    <div class="card-publication p-4">
-                        <!-- Top Metadata -->
+                    <article class="card-publication">
+                        <!-- Card Header Metadata -->
                         <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
                             @if ($pub->category)
                                 <span class="badge badge-category text-truncate" style="max-width: 200px;">
                                     {{ $pub->category->name }}
                                 </span>
                             @else
-                                <span class="badge bg-light text-muted border">Karya Ilmiah</span>
+                                <span class="badge bg-light text-muted border" style="border-radius: 4px;">Karya Ilmiah</span>
                             @endif
                             <span class="text-muted font-monospace small">
                                 {{ $pub->publication_year }}
                             </span>
                         </div>
 
-                        <!-- Title -->
+                        <!-- Publication Title -->
                         <h6 class="fw-bold text-dark mb-2 lh-base">
                             <a href="javascript:void(0)" class="text-dark text-decoration-none hover-primary" data-bs-toggle="modal" data-bs-target="#abstractModal{{ $pub->id }}">
                                 {{ $pub->title }}
                             </a>
                         </h6>
 
-                        <!-- Journal Info -->
+                        <!-- Journal / Source Info -->
                         <div class="text-muted small mb-2 d-flex align-items-center gap-1 text-truncate">
                             <i class="icon-base ti tabler-book-2 flex-shrink-0 text-primary"></i>
                             <span class="text-truncate">{{ $pub->journal_name }}</span>
                         </div>
 
-                        <!-- Authors list -->
+                        <!-- Authors List -->
                         <div class="mb-3">
                             <div class="d-flex flex-wrap gap-1 align-items-center text-muted small">
                                 <i class="icon-base ti tabler-users text-muted flex-shrink-0"></i>
                                 @foreach ($pub->authors->take(2) as $author)
-                                    <span class="badge bg-light text-secondary border font-monospace" style="font-size: 0.72rem;">
+                                    <span class="badge bg-light text-secondary border font-monospace" style="font-size: 0.72rem; border-radius: 4px;">
                                         {{ $author->author_name }}
                                     </span>
                                 @endforeach
@@ -391,12 +379,12 @@
                             </div>
                         </div>
 
-                        <!-- Abstract Clamp -->
-                        <div class="abstract-clamp mb-4 flex-grow-1">
+                        <!-- Abstract Excerpt -->
+                        <div class="abstract-clamp mb-3 flex-grow-1">
                             {{ $pub->abstract }}
                         </div>
 
-                        <!-- Bottom Actions -->
+                        <!-- Bottom Action Buttons -->
                         <div class="d-flex align-items-center justify-content-between gap-2 pt-3 border-top mt-auto">
                             <button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#abstractModal{{ $pub->id }}">
                                 <i class="icon-base ti tabler-file-text"></i>
@@ -416,10 +404,10 @@
                                     <span>Unduh PDF</span>
                                 </a>
                             @else
-                                <span class="badge bg-light text-muted border" style="font-size: 0.72rem;">Naskah Fisik</span>
+                                <span class="badge bg-light text-muted border" style="font-size: 0.72rem; border-radius: 4px;">Naskah Fisik</span>
                             @endif
                         </div>
-                    </div>
+                    </article>
                 </div>
 
                 <!-- Abstract Detail Modal -->
@@ -429,7 +417,7 @@
                             <div class="modal-header border-bottom py-3">
                                 <div>
                                     <div class="d-flex align-items-center gap-2 mb-1">
-                                        <span class="badge bg-light text-muted border font-monospace" style="font-size: 0.75rem;">
+                                        <span class="badge bg-light text-muted border font-monospace" style="font-size: 0.75rem; border-radius: 4px;">
                                             {{ $pub->registration_code }}
                                         </span>
                                         @if ($pub->category)
@@ -509,8 +497,8 @@
                 </div>
             @empty
                 <div class="col-12 py-5 text-center">
-                    <div class="avatar-initials bg-light text-muted rounded-circle p-3 mx-auto mb-3" style="width: 56px; height: 56px;">
-                        <i class="icon-base ti tabler-books fs-2"></i>
+                    <div class="avatar-initials bg-light text-muted rounded-circle p-3 mx-auto mb-3" style="width: 52px; height: 52px;">
+                        <i class="icon-base ti tabler-search fs-3"></i>
                     </div>
                     <h6 class="fw-bold text-dark mb-1">Tidak Ada Naskah Publikasi Ditemukan</h6>
                     <p class="text-muted small mb-3">
@@ -531,14 +519,14 @@
         </div>
 
         @if ($publications->hasPages())
-            <div class="d-flex justify-content-center mt-5">
+            <div class="d-flex justify-content-center mt-4">
                 {{ $publications->links() }}
             </div>
         @endif
     </main>
 
-    <!-- Footer -->
-    <footer class="landing-footer">
+    <!-- Institutional Footer -->
+    <footer class="catalog-footer">
         <div class="container-xl d-flex flex-column flex-sm-row align-items-center justify-content-between gap-2">
             <div>
                 &copy; {{ date('Y') }} <strong>{{ config('app.institution_name', 'Universitas') }}</strong> &bull; Repositori Karya Ilmiah Sivitas Akademika
@@ -549,7 +537,8 @@
         </div>
     </footer>
 
-    <!-- Bootstrap 5 Bundle JS (for Modals) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Local Bootstrap JS & Popper -->
+    <script src="{{ asset('assets/libs/popper/popper.js') }}"></script>
+    <script src="{{ asset('assets/js/bootstrap.js') }}"></script>
 </body>
 </html>
